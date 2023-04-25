@@ -19,7 +19,7 @@ $ ./flp22-log < input.txt > output.txt
 ## Popis řešení
 
 ### Interní reprezentace dat 
-Přechodová pravidla Turingova stroje jsou reprezentována jak dynamický predikát `ts_rule/4`, zatímco obsah pásky je reprezentován seznamem znaků, který je předáván z jednoho výpočetního kroku na následující. Interní páska zároveň obsahuje reprezentaci aktuálního stavu (jeho pozice udává pozici čtecí hlavy), tedy interní obsah iniciální pásky pro vstup `abc = ['S', 'a', 'b', 'c']`.
+Přechodová pravidla Turingova stroje jsou reprezentována jako dynamický predikát `ts_rule/4`, zatímco obsah pásky je reprezentován seznamem znaků, který je předáván z jednoho výpočetního kroku na následující. Interní páska zároveň obsahuje reprezentaci aktuálního stavu (jeho pozice udává pozici čtecí hlavy), tedy interní obsah iniciální pásky pro vstup `abc` = `['S', 'a', 'b', 'c']`.
 
 ### Postup výpočtu
 
@@ -63,10 +63,10 @@ $ ./flp22-log < examples/nondeterm-succ.in
 ```
 
 ### 4. Ukázka chyby nedeterminismu
-Jak zmiňuji v sekci omezení, tak má simulace se zacyklí, pokud se některá z nedeterministických větví zacyklí. Tato nedokonalost je právě ukázána v tomto příkladě. Jako v minulém příkladě se jedná a Turingův stroj se 2 pravidly, kde jsou obě aplikovatelná hned v prvním výpočetním kroku. První pravidlo však vede k nekonečnému cyklu a až druhé pravidlo vede k úspěchy. Jelikož na aplikaci druhého pravidla nikdy nedojde, zůstane simulace v nekonečném cyklu. Délka výpočtu `infinity`. Spuštění pomocí:
+Jak zmiňuji v sekci omezení, tak má simulace se zacyklí, pokud se některá z nedeterministických větví zacyklí. Tato nedokonalost je právě ukázána v tomto příkladě. Jako v minulém příkladě se jedná o Turingův stroj se 2 pravidly, kde jsou obě aplikovatelné hned v prvním výpočetním kroku. První pravidlo však vede k nekonečnému cyklu a až druhé pravidlo vede k úspěchu. Jelikož na aplikaci druhého pravidla nikdy nedojde, zůstane simulace v nekonečném cyklu. Délka výpočtu `infinity`. Spuštění pomocí:
 ```bash
 $ ./flp22-log < examples/nondeterm-fail.in
 ```
 
 ## Omezení
-Jediné omezení, které je mi známo u mého řešení je případ, kdy dojde k zacyklení stroje v jedné z nedeterministických větvích výpočtu. Toto chování je ukázáno v ukázkovém příkladu `examples/nondeterm-fail.in`. Samotný nedeterminismus je funkční, což je potvrzeno ukázkovým příkladem `examples/nondeterm-succ.in`.
+Jediné omezení, které je mi známo u mého řešení je případ, kdy dojde k zacyklení stroje v jedné z nedeterministických větvích výpočtu. Toto chování je ukázáno v ukázkovém příkladu `examples/nondeterm-fail.in`. Samotný nedeterminismus je funkční, což je potvrzeno ukázkovým příkladem `examples/nondeterm-succ.in`. Pro řešení toho nedostatku bych navrhoval iterativně krokovat všechny výpočetní větve, takže pokud všechny větve cyklí, ale jedna vede k výsledku, tak se k tomuto výsledku vždy dojde.
