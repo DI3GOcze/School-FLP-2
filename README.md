@@ -1,9 +1,12 @@
-# FLP logický projekt
+# FLP logický projekt - Turingův stroj
 
-##### Autor: Jakub Kryštůfek
-##### Login: xkryst02
-##### Akademický rok: 2022/2023
-##### Název zadání: Turingův stroj
+Autor: Jakub Kryštůfek
+
+Login: xkryst02
+
+Akademický rok: 2022/2023
+
+Název zadání: Turingův stroj
 
 ## Návod k použití
 
