@@ -1,0 +1,36 @@
+S   X R
+X a X R
+X b X R
+X   Y x
+Y a Y L
+Y b Y L
+Y x Y L
+Y   Q R
+A a A R
+A b A R
+A w A R
+A x A R
+A   U a
+U a U L
+U b U L
+U x U L
+U w W a
+B a B R
+B b B R
+B w B R
+B x B R
+B   I b
+I a I L
+I b I L
+I x I L
+I w W b
+R a A R
+R b A R
+R x A R
+R   Q R
+Q a A w
+Q b B w
+Q x F  
+W a Q R
+W b Q R
+ aababa
