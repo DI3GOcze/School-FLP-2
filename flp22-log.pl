@@ -11,12 +11,16 @@ main :-
     % Disable symbols printed by get_char
 	prompt(_, ''),
     read_lines(Lines),
-    % Create inital configuration of turing machine
-    get_configuration(Tape, Lines),
-    % Run turing machine with initial state S, head position 0 and tape from input
-    run_ts(['S' | Tape], Steps),
-    % Print 
-    write_tapes(Steps).
+    % Initialize configuration of turing machine
+    % If initialization fails, print inptut err
+    get_configuration(Tape, Lines) -> (
+        % Run simulation of turing machine with initial state S, head position 0 and tape from input
+        % If simulation fails, print simulation err
+        run_ts(['S' | Tape], Steps) -> (
+            % Print 
+            print_tapes(Steps)
+        ) ; simulation_err 
+    ) ; input_err. 
 
 
 
@@ -131,12 +135,21 @@ read_lines(Ls) :-
 	), !. 
 
 /** 
- * write_tapes Prints list of turing taps to stdout in string format => ['a', 'b', 'S', 'c'] => 'abSc'
+ * print_tapes Prints list of turing taps to stdout in string format => ['a', 'b', 'S', 'c'] => 'abSc'
  */
-write_tapes([]).
-write_tapes([Tape|RestTapes]) :- atomic_list_concat(Tape, '', TapeString), writeln(TapeString) , write_tapes(RestTapes).
+print_tapes([]).
+print_tapes([Tape|RestTapes]) :- atomic_list_concat(Tape, '', TapeString), writeln(TapeString) , print_tapes(RestTapes).
     
 /** ======================== STDIN HELPERS END ======================== **/
+
+
+
+/** ======================== ERRORS BEGIN ======================== **/
+
+input_err :- writeln('Wrong input format.') , fail.
+simulation_err :- writeln('Simulation didn\'t succed.') , fail.
+
+/** ======================== ERRORS END ======================== **/
 
 
 
