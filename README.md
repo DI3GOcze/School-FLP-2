@@ -32,10 +32,11 @@ Program nejprve nahraje veškerý obsah STDIN do jednotlivých řádků a násle
 #### Simulace Turingova stroje
 Po zpracování vstupu a úspěšné inicializaci se spustí simulace Turingova stroje, která je implementovaná predikátem `run_ts/2`. Tento predikát představuje jeden výpočetní krok Turingova stroje, který představuje:
 
-1. Zjištění aktuálního stavu a znaku pod čtecí hlavou. To jde zjistit z interní reprezentace pásky, která obsahuje aktuální stav a znak následující za aktuálním stavem odpovídá znaku pod čtecí hlavou.
-2. Zjištění aplikovatelného pravidla pomocí predikátu `ts_tule/4`. Díky využití dynamického predikátu je vždy nalezeno jedno aplikovatelné pravidlo, a pokud někde v budoucnu výpočet selže, je pomocí backtrackingu nalezeno jiné aplikovatelné pravidlo a výpočet se spouští znovu s ním. Díky této skutečnosti je simulace nedeterministická.
-3. Aplikace nalezeného pravidla na aktuální pásku. To vytvoří pásku novou, která je předána nadcházejícímu výpočetnímu kroku.
-4. Opakuje se volání výpočetního kroku s nově vytvořenou páskou.
+1. Kontrola, zdali aktuální konfigurace turingova stroje nebyla již v minulosti použita. Tato kontrola dokáže odhalit některé případy nekonečného cyklu. Pro uchovávání použitých konfigurací se využívá dynamický predikát `used_configuration/1`.
+2. Zjištění aktuálního stavu a znaku pod čtecí hlavou. To jde zjistit z interní reprezentace pásky, která obsahuje aktuální stav a znak následující za aktuálním stavem odpovídá znaku pod čtecí hlavou.
+3. Zjištění aplikovatelného pravidla pomocí predikátu `ts_tule/4`. Díky využití dynamického predikátu je vždy nalezeno jedno aplikovatelné pravidlo, a pokud někde v budoucnu výpočet selže, je pomocí backtrackingu nalezeno jiné aplikovatelné pravidlo a výpočet se spouští znovu s ním. Díky této skutečnosti je simulace nedeterministická.
+4. Aplikace nalezeného pravidla na aktuální pásku. To vytvoří pásku novou, která je předána nadcházejícímu výpočetnímu kroku.
+5. Opakuje se volání výpočetního kroku s nově vytvořenou páskou.
 
 ## Spuštění ukázkových vstupů
 
@@ -54,7 +55,7 @@ $ ./flp22-log < examples/a_to_b.in
 ```
 
 ### 3. Duplikace řetězce
-Příklad, který zduplikuje vstupní řetězec `"aababa"` oddělený mezerou na `"aababa aababa"` . Délka výpočtu `0.021s`. Spuštění pomocí:
+Příklad, který zduplikuje vstupní řetězec `"aababaaabbbababbbabaabbbabababbb"` oddělený mezerou na `"aababaaabbbababbbabaabbbabababbb aababaaabbbababbbabaabbbabababbb"` . Délka výpočtu `0.574s`. Spuštění pomocí:
 ```bash
 $ ./flp22-log < examples/copy.in
 ```
@@ -66,10 +67,16 @@ $ ./flp22-log < examples/nondeterm-succ.in
 ```
 
 ### 4. Ukázka chyby nedeterminismu
-Jak zmiňuji v sekci omezení, tak má simulace se zacyklí, pokud se některá z nedeterministických větví zacyklí. Tato nedokonalost je právě ukázána v tomto příkladě. Jako v minulém příkladě se jedná o Turingův stroj se 2 pravidly, kde jsou obě aplikovatelné hned v prvním výpočetním kroku. První pravidlo však vede k nekonečnému cyklu a až druhé pravidlo vede k úspěchu. Jelikož na aplikaci druhého pravidla nikdy nedojde, zůstane simulace v nekonečném cyklu. Délka výpočtu `infinity`. Spuštění pomocí:
+Jak zmiňuji v sekci omezení, tak má simulace se zacyklí, pokud se některá z nedeterministických větví zacyklí a cyklus se nedetekuje. Tato nedokonalost je právě ukázána v tomto příkladě. Jako v minulém příkladě se jedná o Turingův stroj se 3 pravidly, kde jsou první a poslední aplikovatelná hned v prvním výpočetním kroku. První a druhé pravidlo však vede k nekonečnému cyklu a poslední pravidlo vede k úspěchu. Jelikož na aplikaci posledního pravidla nikdy nedojde, zůstane simulace v nekonečném cyklu. Délka výpočtu `infinity`. Spuštění pomocí:
 ```bash
 $ ./flp22-log < examples/nondeterm-fail.in
 ```
 
+### 5. Ukázka detekce nekonečného cyklu
+Mé řešení dokáže detekovat takové cyklení turingova stroje, kde se stroj vyskytne v nějaké konfiguraci vícekrát. Pokud se Turingův stroj dvakrát dostane do stejné konfigurace (stejný obsah pásky, pozice hlavy a stav), pak je jasné, že se nachází v nekonečném cyklu. Detekci takového cyklu prezentuje právě tento příklad, kde jsou pouze dvě pravidla. První zapříčiní nekonečný cyklus a druhý vede k úspěchu. Stroj detekuje opakovanou konfiguraci a pak násladně pomocí backtrackingu vyzkouší druhé pravidlo, které poté vede k úspěchu. Délka výpočtu `0.018s`. Spuštění pomocí:
+```bash
+$ ./flp22-log < examples/infinite-detect.in
+```
+
 ## Omezení
-Jediné omezení, které je mi známo u mého řešení je případ, kdy dojde k zacyklení stroje v jedné z nedeterministických větvích výpočtu. Toto chování je ukázáno v ukázkovém příkladu `examples/nondeterm-fail.in`. Samotný nedeterminismus je funkční, což je potvrzeno ukázkovým příkladem `examples/nondeterm-succ.in`. Pro řešení toho nedostatku bych navrhoval iterativně krokovat všechny výpočetní větve, takže pokud všechny větve cyklí, ale jedna vede k výsledku, tak se k tomuto výsledku vždy dojde.
+Jediné omezení, které je mi známo u mého řešení je případ, kdy dojde k nedetekovatelnému zacyklení stroje v jedné z nedeterministických větvích výpočtu. Toto chování je ukázáno v ukázkovém příkladu `examples/nondeterm-fail.in`. Samotný nedeterminismus a detekce opakovaných konfigurací jsou funkční, což je potvrzeno ukázkovými příklady `examples/nondeterm-succ.in` a `examples/infinite-detect.in`. Pro řešení toho nedostatku bych navrhoval iterativně krokovat všechny výpočetní větve, takže pokud všechny větve cyklí, ale jedna vede k výsledku, tak se k tomuto výsledku vždy dojde.

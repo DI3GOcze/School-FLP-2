@@ -30,6 +30,10 @@ main :-
  * ts_rule(CURRENT_STATE, HEAD_SYMBOL, NEXT_STATE, ACTION(symbol/R/L))
  */
 :- dynamic ts_rule/4.
+/**
+ * used_configuration(ALREADY_USED_CONFIGURATION) is used for infinite cycle detection
+ */
+:- dynamic used_configuration/1.
 
 /**
  * get_configuration Parses list of strings to Tape and Rules (last string is Tape)
@@ -102,6 +106,10 @@ run_ts(Tape, [Tape]) :-
     is_equal(CurrentState, 'F').
 % For every other situation than state = F, simulete one step of turing machine
 run_ts(Tape, [Tape | Steps]) :-
+    % Make sure, that the the configuration wasn't used before (infinite cycle detection)
+    not(used_configuration(Tape)),
+    % Save the configuration to already used configuration for infinite cycle detection
+    assert(used_configuration(Tape)),
     % Get character on HEAD and current state
     get_current_state(CurrentState, HeadSymbol, Tape),
     get_applicable_rule(CurrentState, HeadSymbol, NextState, Action),
